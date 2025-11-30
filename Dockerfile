@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install    # ← CAMBIA QUI (era npm ci)
 
 COPY . .
 RUN npm run build
@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Copia solo le dipendenze di produzione
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force    # ← CAMBIA QUI (era npm ci)
 
 # Copia il build dalla fase precedente
 COPY --from=builder /app/dist ./dist
