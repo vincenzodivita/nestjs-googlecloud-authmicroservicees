@@ -1,0 +1,19 @@
+# Ignora file non necessari per il deploy
+.git
+.gitignore
+node_modules
+npm-debug.log
+.env
+.env.local
+README.md
+.vscode
+.idea
+
+# Test e development
+test/
+*.test.ts
+*.spec.ts
+
+# Documentation
+docs/
+*.md
