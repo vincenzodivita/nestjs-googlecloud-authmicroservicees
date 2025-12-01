@@ -10,6 +10,7 @@ export interface Song {
   bpm: number;
   timeSignature: number;
   sections?: SongSection[];
+  sharedWith: string[];   // Array di user IDs con cui è condivisa
   createdAt: Date;
   updatedAt: Date;
 }

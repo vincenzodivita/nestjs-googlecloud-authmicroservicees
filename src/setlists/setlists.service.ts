@@ -116,4 +116,32 @@ export class SetlistsService {
 
     return this.update(userId, setlistId, { songs: songIds });
   }
+
+async shareSetlist(userId: string, setlistId: string, dto: { userIds: string[] }): Promise<Setlist> {
+  const setlist = await this.findOne(userId, setlistId);
+
+  // Se non esiste il campo sharedWith, lo inizializza
+  if (!setlist.sharedWith) {
+    setlist.sharedWith = [];
+  }
+
+  // Aggiunge solo userIds non già presenti
+  const updatedSharedWith = Array.from(new Set([...setlist.sharedWith, ...dto.userIds]));
+
+  return this.update(userId, setlistId, { sharedWith: updatedSharedWith });
+}
+
+async unshareSetlist(userId: string, setlistId: string, removeUserId: string): Promise<Setlist> {
+  const setlist = await this.findOne(userId, setlistId);
+
+  if (!setlist.sharedWith || !setlist.sharedWith.includes(removeUserId)) {
+    throw new NotFoundException('Questo utente non ha accesso alla setlist');
+  }
+
+  const updatedSharedWith = setlist.sharedWith.filter(id => id !== removeUserId);
+
+  return this.update(userId, setlistId, { sharedWith: updatedSharedWith });
+}
+
+
 }

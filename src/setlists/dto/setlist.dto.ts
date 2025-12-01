@@ -8,6 +8,11 @@ export class CreateSetlistDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  sharedWith?: string[];  // Array di user IDs
 }
 
 export class UpdateSetlistDto {
@@ -24,6 +29,11 @@ export class UpdateSetlistDto {
   @IsArray()
   @IsString({ each: true })
   songs?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  sharedWith?: string[];  // Array di user IDs
 }
 
 export class AddSongToSetlistDto {
@@ -36,4 +46,10 @@ export class ReorderSongsDto {
   @IsArray()
   @IsString({ each: true })
   songIds: string[];
+}
+
+export class ShareSetlistDto {
+  @IsArray()
+  @IsString({ each: true })
+  userIds: string[];  // Array di user IDs con cui condividere
 }

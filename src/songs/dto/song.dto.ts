@@ -57,4 +57,16 @@ export class UpdateSongDto {
   @ValidateNested({ each: true })
   @Type(() => SongSectionDto)
   sections?: SongSectionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  sharedWith?: string[];
 }
+
+export class ShareSongDto {
+  @IsArray()
+  @IsString({ each: true })
+  userIds: string[];
+}
+
