@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { SetlistsService } from './setlists.service';
-import { SetlistsController } from './setlists.controller';
+import { SongsService } from './songs.service';
+import { SongsController } from './songs.controller';
 import { FirestoreModule } from '../firestore/firestore.module';
-import { SongsModule } from '../songs/songs.module';
+import { FriendsModule } from '../friends/friends.module';
 
 @Module({
-  imports: [FirestoreModule, SongsModule],
-  controllers: [SetlistsController],
-  providers: [SetlistsService],
+  imports: [FirestoreModule, FriendsModule],
+  controllers: [SongsController],
+  providers: [SongsService],
+  exports: [SongsService],
 })
-export class SetlistsModule {}
+export class SongsModule {}

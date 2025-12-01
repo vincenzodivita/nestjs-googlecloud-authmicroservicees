@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { SongsService } from './songs.service';
-import { CreateSongDto, UpdateSongDto } from './dto/song.dto';
+import { CreateSongDto, UpdateSongDto, ShareSongDto } from './dto/song.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('songs')
@@ -31,5 +31,15 @@ export class SongsController {
   @Delete(':id')
   remove(@Request() req, @Param('id') id: string) {
     return this.songsService.remove(req.user.id, id);
+  }
+
+  @Post(':id/share')
+  shareSong(@Request() req, @Param('id') id: string, @Body() dto: ShareSongDto) {
+    return this.songsService.shareSong(req.user.id, id, dto);
+  }
+
+  @Delete(':id/share/:userId')
+  unshareSong(@Request() req, @Param('id') id: string, @Param('userId') userId: string) {
+    return this.songsService.unshareSong(req.user.id, id, userId);
   }
 }

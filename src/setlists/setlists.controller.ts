@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { SetlistsService } from './setlists.service';
-import { CreateSetlistDto, UpdateSetlistDto, AddSongToSetlistDto, ReorderSongsDto } from './dto/setlist.dto';
+import { CreateSetlistDto, UpdateSetlistDto, AddSongToSetlistDto, ReorderSongsDto, ShareSetlistDto } from './dto/setlist.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('setlists')
@@ -46,5 +46,15 @@ export class SetlistsController {
   @Patch(':id/reorder')
   reorderSongs(@Request() req, @Param('id') id: string, @Body() reorderDto: ReorderSongsDto) {
     return this.setlistsService.reorderSongs(req.user.id, id, reorderDto.songIds);
+  }
+
+  @Post(':id/share')
+  shareSetlist(@Request() req, @Param('id') id: string, @Body() dto: ShareSetlistDto) {
+    return this.setlistsService.shareSetlist(req.user.id, id, dto);
+  }
+
+  @Delete(':id/share/:userId')
+  unshareSetlist(@Request() req, @Param('id') id: string, @Param('userId') userId: string) {
+    return this.setlistsService.unshareSetlist(req.user.id, id, userId);
   }
 }
