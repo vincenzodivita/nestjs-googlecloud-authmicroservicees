@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { SongsService } from './songs.service';
-import { SongsController } from './songs.controller';
+import { SetlistsService } from './setlists.service';
+import { SetlistsController } from './setlists.controller';
 import { FirestoreModule } from '../firestore/firestore.module';
 import { SongsModule } from '../songs/songs.module';
 import { FriendsModule } from '../friends/friends.module';
