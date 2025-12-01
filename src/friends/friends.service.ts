@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { FirestoreService } from '../firestore/firestore.service';
 import { Friendship, FriendshipStatus, FriendWithUser } from './entities/friend.entity';
 import { SendFriendRequestDto } from './dto/friend.dto';
+import { User, UserResponse } from '../auth/entities/user.entity';
+
 
 @Injectable()
 export class FriendsService {
@@ -116,29 +118,34 @@ export class FriendsService {
     );
 
     const pendingRequests = requests.filter(
-      (req: any) => req.status === FriendshipStatus.PENDING
+      (req: Friendship) => req.status === FriendshipStatus.PENDING
     );
 
     // Ottieni info degli utenti che hanno inviato la richiesta
     const friendsWithUsers = await Promise.all(
-      pendingRequests.map(async (request: any) => {
-        const sender = await this.firestoreService.getDocument(
+      pendingRequests.map(async (request: Friendship) => {
+        const sender = await this.firestoreService.getDocument<User>(
           this.USERS_COLLECTION,
           request.senderId,
         );
+
+        if (!sender) {
+          throw new NotFoundException('Utente non trovato');
+        }
+
         return {
           id: request.id,
-          userId: sender.id,
+          userId: sender.id!,
           email: sender.email,
           name: sender.name,
           status: request.status,
           createdAt: request.createdAt,
         };
       })
-    );
+  );
 
-    return friendsWithUsers;
-  }
+  return friendsWithUsers;
+}
 
   async getFriends(userId: string): Promise<FriendWithUser[]> {
     // Ottieni tutte le amicizie accettate (sia come sender che receiver)
@@ -157,20 +164,27 @@ export class FriendsService {
     );
 
     const allFriendships = [...sentFriendships, ...receivedFriendships].filter(
-      (friendship: any) => friendship.status === FriendshipStatus.ACCEPTED
+      (friendship: Friendship) => friendship.status === FriendshipStatus.ACCEPTED
     );
 
     // Ottieni info degli amici
     const friendsWithUsers = await Promise.all(
-      allFriendships.map(async (friendship: any) => {
-        const friendId = friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
-        const friend = await this.firestoreService.getDocument(
+      allFriendships.map(async (friendship: Friendship) => {
+        const friendId =
+          friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
+
+        const friend = await this.firestoreService.getDocument<User>(
           this.USERS_COLLECTION,
           friendId,
         );
+
+        if (!friend) {
+          throw new NotFoundException('Utente non trovato');
+        }
+
         return {
           id: friendship.id,
-          userId: friend.id,
+          userId: friend.id!,
           email: friend.email,
           name: friend.name,
           status: friendship.status,
@@ -181,6 +195,7 @@ export class FriendsService {
 
     return friendsWithUsers;
   }
+
 
   async removeFriend(userId: string, friendshipId: string): Promise<void> {
     const friendship = await this.firestoreService.getDocument(

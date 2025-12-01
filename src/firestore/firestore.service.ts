@@ -23,12 +23,10 @@ export class FirestoreService implements OnModuleInit {
   }
 
   // Helper methods per operazioni comuni
-  async getDocument(collection: string, docId: string) {
-    const doc = await this.firestore.collection(collection).doc(docId).get();
-    if (!doc.exists) {
-      return null;
-    }
-    return { id: doc.id, ...doc.data() };
+  async getDocument<T = any>(collection: string, id: string): Promise<T | null> {
+    const doc = await this.firestore.collection(collection).doc(id).get();
+    if (!doc.exists) return null;
+    return { id: doc.id, ...doc.data() } as T;
   }
 
   async createDocument(collection: string, data: any, docId?: string) {

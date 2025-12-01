@@ -18,6 +18,7 @@ export class SetlistsService {
     const setlistData: Omit<Setlist, 'id'> = {
       userId,
       ...createSetlistDto,
+      sharedWith: createSetlistDto.sharedWith || [],
       songs: [],
       createdAt: now,
       updatedAt: now,
