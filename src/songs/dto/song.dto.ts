@@ -1,7 +1,6 @@
 import { IsString, IsNotEmpty, IsNumber, Min, Max, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
-// ✅ ESPORTATA - Questo è il fix!
 export class SongSectionDto {
   @IsString()
   @IsNotEmpty()
@@ -17,6 +16,14 @@ export class CreateSongDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsOptional()
+  @IsString()
+  artist?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsNumber()
   @Min(30)
@@ -45,6 +52,14 @@ export class UpdateSongDto {
   @IsString()
   @IsNotEmpty()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  artist?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsOptional()
   @IsNumber()

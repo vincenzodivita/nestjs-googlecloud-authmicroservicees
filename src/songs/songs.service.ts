@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { FirestoreService } from '../firestore/firestore.service';
 import { FriendsService } from '../friends/friends.service';
 import { Song } from './entities/song.entity';
-import { CreateSongDto, UpdateSongDto, ShareSongDto, SongSectionDto } from './dto/song.dto';
+import { CreateSongDto, UpdateSongDto, ShareSongDto } from './dto/song.dto';
 
 @Injectable()
 export class SongsService {
@@ -21,11 +21,15 @@ export class SongsService {
 
     const songData: Omit<Song, 'id'> = {
       userId,
-      ...createSongDto,
+      name: createSongDto.name,
+      artist: createSongDto.artist || null,
+      description: createSongDto.description || null,
+      bpm: createSongDto.bpm,
+      timeSignature: createSongDto.timeSignature,
+      sections: plainSections || [],
       sharedWith: createSongDto.sharedWith || [],
       createdAt: now,
       updatedAt: now,
-      sections: plainSections,
     };
 
     // Verifica che gli utenti con cui condividere siano amici
@@ -82,14 +86,22 @@ export class SongsService {
       await this.validateSharedUsers(userId, updateSongDto.sharedWith);
     }
 
-    // Trasforma sections in oggetti plain
+    // Trasforma sections in oggetti plain se presenti
     const plainSections = updateSongDto.sections?.map(s => ({ name: s.name, bars: s.bars }));
 
-    const updatedData = {
-      ...updateSongDto,
+    // Costruisci l'oggetto di aggiornamento
+    const updatedData: Partial<Song> = {
       updatedAt: new Date(),
-      sections: plainSections,
     };
+
+    // Aggiungi solo i campi presenti nel DTO
+    if (updateSongDto.name !== undefined) updatedData.name = updateSongDto.name;
+    if (updateSongDto.artist !== undefined) updatedData.artist = updateSongDto.artist || null;
+    if (updateSongDto.description !== undefined) updatedData.description = updateSongDto.description || null;
+    if (updateSongDto.bpm !== undefined) updatedData.bpm = updateSongDto.bpm;
+    if (updateSongDto.timeSignature !== undefined) updatedData.timeSignature = updateSongDto.timeSignature;
+    if (updateSongDto.sections !== undefined) updatedData.sections = plainSections;
+    if (updateSongDto.sharedWith !== undefined) updatedData.sharedWith = updateSongDto.sharedWith;
 
     const updatedSong = await this.firestoreService.updateDocument(
       this.SONGS_COLLECTION,

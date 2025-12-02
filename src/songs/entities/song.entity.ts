@@ -7,10 +7,12 @@ export interface Song {
   id?: string;
   userId: string;
   name: string;
+  artist?: string;
+  description?: string;
   bpm: number;
   timeSignature: number;
   sections?: SongSection[];
-  sharedWith: string[];   // Array di user IDs con cui è condivisa
+  sharedWith: string[];
   createdAt: Date;
   updatedAt: Date;
 }
