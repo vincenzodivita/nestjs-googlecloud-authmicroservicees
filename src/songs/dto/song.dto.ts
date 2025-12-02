@@ -1,7 +1,8 @@
 import { IsString, IsNotEmpty, IsNumber, Min, Max, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class SongSectionDto {
+// ✅ ESPORTATA - Questo è il fix!
+export class SongSectionDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -74,4 +75,3 @@ export class ShareSongDto {
   @IsString({ each: true })
   userIds: string[];
 }
-
