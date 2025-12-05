@@ -33,7 +33,7 @@ export class AuthService {
   ) {}
 
   // === REGISTRAZIONE ===
-  async register(registerDto: RegisterDto): Promise<{ user: UserResponse; access_token: string }> {
+  async register(registerDto: RegisterDto): Promise<{ user: UserResponse; access_token: string | null; message: string }> {
     const { email, password, name } = registerDto;
 
     // Verifica se l'email esiste già
@@ -75,19 +75,14 @@ export class AuthService {
     // Salva il token nel database
     await this.saveToken(createdUser.id, verificationToken, 'email_verification', verificationExpires);
 
-    // Invia email di verifica
+    // Invia solo email di verifica (welcome email verrà inviata dopo la verifica)
     await this.emailService.sendVerificationEmail(email, name, verificationToken);
 
-    // Invia anche email di benvenuto
-    await this.emailService.sendWelcomeEmail(email, name);
-
-    // Genera JWT
-    const payload = { sub: createdUser.id, email: createdUser.email };
-    const access_token = await this.jwtService.signAsync(payload);
-
+    // NON generiamo JWT - l'utente deve prima verificare l'email
     return {
       user: this.toUserResponse(createdUser as User),
-      access_token,
+      access_token: null, // Nessun token fino a verifica email
+      message: 'Registrazione completata. Controlla la tua email per verificare l\'account.',
     };
   }
 
@@ -113,8 +108,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenziali non valide');
     }
 
-    // Nota: permettiamo il login anche se l'email non è verificata,
-    // ma il frontend può mostrare un avviso
+    // Blocca login se email non verificata
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException('Email non verificata. Controlla la tua casella di posta per il link di verifica.');
+    }
 
     const payload = { sub: user.id, email: user.email };
     const access_token = await this.jwtService.signAsync(payload);
@@ -126,7 +123,7 @@ export class AuthService {
   }
 
   // === VERIFICA EMAIL ===
-  async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string; user: UserResponse }> {
+  async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string; user: UserResponse; access_token: string }> {
     const { token } = dto;
 
     // Cerca il token nel database
@@ -160,9 +157,17 @@ export class AuthService {
     // Invalida il token
     await this.invalidateToken(tokenDoc.id!);
 
+    // Invia email di benvenuto dopo la verifica
+    await this.emailService.sendWelcomeEmail(user.email, user.name);
+
+    // Genera JWT per permettere login automatico dopo verifica
+    const payload = { sub: user.id, email: user.email };
+    const access_token = await this.jwtService.signAsync(payload);
+
     return {
       message: 'Email verificata con successo',
       user: this.toUserResponse({ ...user, isEmailVerified: true }),
+      access_token,
     };
   }
 
