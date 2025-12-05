@@ -5,10 +5,12 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { FirestoreModule } from '../firestore/firestore.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     FirestoreModule,
+    EmailModule,
     PassportModule,
     JwtModule.register({
       global: true,
